@@ -1,0 +1,26 @@
+{
+  "name": "cc-smart-contract",
+  "version": "1.0.0",
+  "description": "",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sunshine-labs/cc-smart-contract.git"
+  },
+  "keywords": [],
+  "author": "Nate Faber",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sunshine-labs/cc-smart-contract/issues"
+  },
+  "homepage": "https://github.com/sunshine-labs/cc-smart-contract#readme",
+  "dependencies": {
+    "openzeppelin-solidity": "3.1.0"
+  }
+}
