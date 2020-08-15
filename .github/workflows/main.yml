@@ -26,9 +26,8 @@ jobs:
     - name: Install Dependencies
       run: |
         npm install
-        npm install truffle
         export PATH=$PATH:./node_modules/.bin
 
     # Runs a single command using the runners shell
-    - name: Run a one-line script
-      run: truffle test
+    - name: Test truffle
+      run: npx truffle test
