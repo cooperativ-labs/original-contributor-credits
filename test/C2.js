@@ -1,5 +1,5 @@
-
 const C2 = artifacts.require("C2");
+const BackingToken = artifacts.require("BackingToken");
 const truffleAssert = require('truffle-assertions');
 
 const assertBalance = async (instance, addr, amount) => {
@@ -11,6 +11,9 @@ contract("C2", async (accounts) => {
 
     before(async () =>{
         this.c2 = await C2.deployed();
+        this.bac = await BackingToken.deployed();
+
+
     })
 
     it("shouldn't have any tokens to start", async () => {
