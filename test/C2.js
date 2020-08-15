@@ -8,34 +8,35 @@ const assertBalance = async (instance, addr, amount) => {
 }
 
 contract("C2", async (accounts) => {
+
+    before(async () =>{
+        this.c2 = await C2.deployed();
+    })
+
     it("shouldn't have any tokens to start", async () => {
-        const instance = await C2.deployed();
-        const totalSupply = await instance.totalSupply.call();
+        const totalSupply = await this.c2.totalSupply.call();
         assert.equal(
-                totalSupply.toNumber(),
-                0,
-                "tokens were created when none should have been"
-                );
+            totalSupply.toNumber(),
+            0,
+            "tokens were created when none should have been"
+        );
     });
     it("can issue tokens", async () => {
-        const instance = await C2.deployed();
-        await instance.issue(accounts[1], 1);
+        await this.c2.issue(accounts[1], 1);
 
-        await assertBalance(instance, accounts[1], 1);
+        await assertBalance(this.c2, accounts[1], 1);
     });
     it("should only allow the owner to issue tokens", async() => {
-        const instance = await C2.deployed({ from: accounts[0] });
-        truffleAssert.reverts(instance.issue(accounts[1], 1, { from: accounts[1] }))
+        truffleAssert.reverts(this.c2.issue(accounts[1], 1, { from: accounts[1] }))
     })
     it("can relinquish tokens", async() => {
-        const instance = await C2.deployed({ from: accounts[0] });
-        await instance.issue(accounts[1], 9);
+        await this.c2.issue(accounts[1], 9);
 
-        await assertBalance(instance, accounts[1], 10);
+        await assertBalance(this.c2, accounts[1], 10);
         
-        await instance.burn(1, { from: accounts[1] });
+        await this.c2.burn(1, { from: accounts[1] });
 
-        await assertBalance(instance, accounts[1], 9);
+        await assertBalance(this.c2, accounts[1], 9);
     });
     // it("should only allow transfers to and from owner", () => {
     //     assert.fail();
