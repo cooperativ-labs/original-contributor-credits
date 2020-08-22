@@ -22,4 +22,9 @@ contract C2 is ERC20, Ownable {
         _burn(_msgSender(), amount);
         _backingToken.transfer(this.owner(), amount);
     }
+
+    function cashout(uint256 amount) public {
+        _burn(_msgSender(), amount);
+        _backingToken.transfer(_msgSender(), amount);
+    }
 }

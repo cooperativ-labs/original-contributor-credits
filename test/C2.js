@@ -77,6 +77,18 @@ contract("C2", async (acc) => {
         await assertBalance(this.c2, acc[1], this.c2Bal[1]);
         await assertBalance(this.bac, acc[0], this.bacBal[0]);
     });
+    it("can cash out", async() => {
+        const amountToIssue = 11;
+        const amountToCashOut = 7;
+        await issue(acc[2], amountToIssue);
+
+        await assertBalance(this.c2, acc[2], this.c2Bal[2] + amountToIssue);
+
+        await this.c2.cashout(amountToCashOut, { from: acc[2] });
+
+        await assertBalance(this.c2, acc[2], this.c2Bal[2] + amountToIssue - amountToCashOut);
+        await assertBalance(this.bac, acc[2], this.bacBal[2] + amountToCashOut);
+    });
     // it("should only allow transfers to and from owner", () => {
     //     assert.fail();
     // });
