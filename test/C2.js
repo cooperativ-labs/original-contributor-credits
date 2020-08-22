@@ -12,10 +12,17 @@ contract("C2", async (accounts) => {
     before(async () =>{
         this.c2 = await C2.deployed();
         this.bac = await BackingToken.deployed();
-
-
+        this.testAccountIndex = 0;
     })
 
+    beforeEach(async () => {
+        this.testAccountIndex += 1;
+        this.testAccount = accounts[this.testAccountIndex];
+    })
+
+    it("should issue BackingToken to account 0", async () => {
+        await assertBalance(this.bac, accounts[0], 1000000);
+    })
     it("shouldn't have any tokens to start", async () => {
         const totalSupply = await this.c2.totalSupply.call();
         assert.equal(
