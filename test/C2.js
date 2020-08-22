@@ -12,16 +12,20 @@ const assertBalance = async (instance, addr, amount) => {
     assert.equal(bal, amount, `Balance is ${bal}, not ${amount}`);
 }
 
-const issue = async (addr, amount) => {
-    await this.bac.approve(this.c2.address, amount);
-    await this.c2.issue(addr, amount);
-}
 
 contract("C2", async (acc) => {
+    const issue = async (addr, amount) => {
+        const backingNeeded = await this.c2._backingNeededFor.call(amount);
+        await this.bac.approve(this.c2.address, amount);
+        await this.c2.issue(addr, amount);
+    }
+    
     before(async () =>{
         this.c2 = await C2.deployed();
         this.bac = await BackingToken.deployed();
         this.testAccountIndex = 0;
+        await this.c2.issue(acc[0], 100);
+        await this.bac.transfer(this.c2.address, 100);
     })
 
     beforeEach(async () => {
