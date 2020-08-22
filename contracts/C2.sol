@@ -15,9 +15,11 @@ contract C2 is ERC20, Ownable {
     
     function issue(address account, uint256 amount) public onlyOwner {
         _mint(account, amount);
+        _backingToken.transferFrom(_msgSender(), address(this), amount);
     }
 
     function burn(uint256 amount) public {
         _burn(_msgSender(), amount);
+        _backingToken.transfer(this.owner(), amount);
     }
 }

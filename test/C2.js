@@ -32,21 +32,28 @@ contract("C2", async (accounts) => {
         );
     });
     it("can issue tokens", async () => {
+        await this.bac.approve(this.c2.address, 1);
         await this.c2.issue(accounts[1], 1);
 
         await assertBalance(this.c2, accounts[1], 1);
+        await assertBalance(this.bac, accounts[0], 999999);
     });
+    it("must stake backing tokens to issue c2", async() => {
+        truffleAssert.reverts(this.c2.issue(accounts[1], 1000000));
+    })
     it("should only allow the owner to issue tokens", async() => {
+        await this.bac.transfer(accounts[1], 2);
         truffleAssert.reverts(this.c2.issue(accounts[1], 1, { from: accounts[1] }))
     })
     it("can relinquish tokens", async() => {
+        await this.bac.approve(this.c2.address, 9);
         await this.c2.issue(accounts[1], 9);
 
         await assertBalance(this.c2, accounts[1], 10);
         
         await this.c2.burn(1, { from: accounts[1] });
-
         await assertBalance(this.c2, accounts[1], 9);
+        await assertBalance(this.bac, accounts[0], 999989);
     });
     // it("should only allow transfers to and from owner", () => {
     //     assert.fail();
