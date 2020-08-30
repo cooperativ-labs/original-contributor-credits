@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.6.8;
 
+
 import 'openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import 'openzeppelin-solidity/contracts/token/ERC20/IERC20.sol';
 import 'openzeppelin-solidity/contracts/access/Ownable.sol';
+import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract C2 is ERC20, Ownable {
 
