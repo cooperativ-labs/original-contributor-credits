@@ -13,6 +13,8 @@ const assertBalance = async (instance, addr, amount) => {
 }
 
 function testStakingRatio(establishBac, establishC2) {
+    const initialStakingRatio = establishBac/establishC2;
+
     contract("C2", async (acc) => {
         const issue = async (addr, amount) => {
             const backingNeeded = await this.c2._backingNeededFor.call(amount);
@@ -64,11 +66,11 @@ function testStakingRatio(establishBac, establishC2) {
         })
 
         it("can issue tokens", async () => {
-            const amountToIssue = 1;
-            await issue(acc[1], amountToIssue);
+            const c2ToIssue = 1;
+            await issue(acc[1], c2ToIssue);
 
-            await assertBalance(this.c2, acc[1], amountToIssue);
-            await assertBalance(this.bac, acc[0], this.bacBal[0] - amountToIssue);
+            await assertBalance(this.c2, acc[1], c2ToIssue);
+            await assertBalance(this.bac, acc[0], this.bacBal[0] - int(c2ToIssue * initialStakingRatio);
         });
 
         it("must stake backing tokens to issue c2", async() => {
