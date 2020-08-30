@@ -60,6 +60,13 @@ contract("C2", async (acc) => {
         await assertBalance(this.bac, acc[0], this.bacBal[0] - establishBac);
     })
 
+    it("cannot be established twice", async () => {
+        const establishBac = 100;
+        const establishC2 = 100;
+        await this.bac.approve(this.c2.address, establishBac);
+        truffleAssert.reverts(this.c2.establish(establishBac, establishC2));
+    })
+
     it("can issue tokens", async () => {
         const amountToIssue = 1;
         await issue(acc[1], amountToIssue);
