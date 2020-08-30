@@ -17,9 +17,9 @@ const assertBalance = async (instance, addr, amount) => {
 
 
 contract("Integration_Test", async (acc) => {
-    const issue = async (addr, amount) => {
+    const issueAmount = async (addr, amount) => {
         const backingNeeded = await this.c2._backingNeededFor.call(amount);
-        await this.bac.approve(this.c2.address, amount);
+        await this.bac.approve(this.c2.address, backingNeeded);
         await this.c2.issue(addr, amount);
     }
     
@@ -45,16 +45,16 @@ contract("Integration_Test", async (acc) => {
         const establishBac = 1;
         const establishC2 = 100;
         await this.bac.approve(this.c2.address, establishBac);
-        await this.c2.approve(this.c2.address, establishBac);
         await this.c2.establish(establishBac, establishC2)
         
         await assertBalance(this.c2, acc[0], establishC2)
     })
 
     it("Owner pays pays 100 C2 to Con1, Con2 and Con3", async () => {
-        issue(acc[1], 100);
-        issue(acc[2], 100);
-        issue(acc[3], 100);
+
+        await issueAmount(acc[1], 100);
+        await issueAmount(acc[2], 100);
+        await issueAmount(acc[3], 100);
 
         await assertBalance(this.bac, acc[0], this.bacBal[0] - 3);
         await assertBalance(this.c2, acc[1], 100);
@@ -75,13 +75,21 @@ contract("Integration_Test", async (acc) => {
     })
 
     it("Owner increases stake to 2%", async () => {
-        await this.bac.transfer(acc[1], 3);
+
+        await this.bac.transfer(this.c2.address, 2);
+
+        const c2 = await this.c2.totalSupply.call();
+        await assertBalance(this.bac, this.c2.address, 4);
+        const ratio = await this.c2._backingNeededFor.call(100);
+
+        assert.equal(c2, 200);
+        assert.equal(ratio, 2);
     });
 
     it("Owner pays pays 100 C2 to Con1, Con2 and Con3", async () => {
-        issue(acc[1], 100);
-        issue(acc[2], 100);
-        issue(acc[3], 100);
+        await issueAmount(acc[1], 100);
+        await issueAmount(acc[2], 100);
+        await issueAmount(acc[3], 100);
 
         await assertBalance(this.bac, acc[0], this.bacBal[0] - 6);
         await assertBalance(this.c2, acc[1], 200);
@@ -92,7 +100,7 @@ contract("Integration_Test", async (acc) => {
     it("Con2 cashes out", async () => {
         await this.c2.cashout(100, { from: acc[2] });
         await assertBalance(this.c2, acc[2], 0);
-        await assertBalance(this.bc, acc[2], this.bacBal[2] + 2);
+        await assertBalance(this.bac, acc[2], this.bacBal[2] + 2);
     })
 
     it("Con3 burns", async () => {
@@ -102,13 +110,20 @@ contract("Integration_Test", async (acc) => {
     })
 
     it("Owner increases stake to 10%", async () => {
-        await this.bac.transfer(acc[1], 26);
+        await this.bac.transfer(this.c2.address, 24);
+
+        const c2 = await this.c2.totalSupply.call();
+        await assertBalance(this.bac, this.c2.address, 30);
+        const ratio = await this.c2._backingNeededFor.call(100);
+
+        assert.equal(c2, 300);
+        assert.equal(ratio, 10);
     });
 
     it("Owner pays pays 100 C2 to Con1, Con2 and Con3", async () => {
-        issue(acc[1], 100);
-        issue(acc[2], 100);
-        issue(acc[3], 100);
+        await issueAmount(acc[1], 100);
+        await issueAmount(acc[2], 100);
+        await issueAmount(acc[3], 100);
 
         await assertBalance(this.bac, acc[0], this.bacBal[0] - 30);
         await assertBalance(this.c2, acc[1], 300);
@@ -129,16 +144,23 @@ contract("Integration_Test", async (acc) => {
     })
 
     it("Owner increases stake to 100%", async () => {
-        await this.bac.transfer(acc[1], 370);
+        await this.bac.transfer(this.c2.address, 360);
+
+        const c2 = await this.c2.totalSupply.call();
+        await assertBalance(this.bac, this.c2.address, 400);
+        const ratio = await this.c2._backingNeededFor.call(100);
+
+        assert.equal(c2, 400);
+        assert.equal(ratio, 100);
     });
 
     it("Owner pays pays 100 C2 to Con1, Con2 and Con3", async () => {
-        issue(acc[1], 100);
-        issue(acc[2], 100);
-        issue(acc[3], 100);
+        await issueAmount(acc[1], 100);
+        await issueAmount(acc[2], 100);
+        await issueAmount(acc[3], 100);
 
         await assertBalance(this.bac, acc[0], this.bacBal[0] - 300);
-        await assertBalance(this.c2, acc[1], 200);
+        await assertBalance(this.c2, acc[1], 400);
         await assertBalance(this.c2, acc[2], 100);
         await assertBalance(this.c2, acc[3], 100);
     });
@@ -150,14 +172,14 @@ contract("Integration_Test", async (acc) => {
     })
 
     it("Con3 burns", async () => {
-        await this.c2.burn(amountToRelinquish, { from: acc[1] });
+        await this.c2.burn(100, { from: acc[3] });
         await assertBalance(this.c2, acc[3], 0);
         await assertBalance(this.bac, acc[3], this.bacBal[3]);
     })
 
-    it("Con3 cashes out", async () => {
-        await this.c2.cashout(100, { from: acc[2] });
-        await assertBalance(this.c2, acc[2], 0);
-        await assertBalance(this.bac, acc[2], this.bacBal[2] + 113);
+    it("Con1 cashes out", async () => {
+        await this.c2.cashout(400, { from: acc[1] });
+        await assertBalance(this.c2, acc[1], 0);
+        await assertBalance(this.bac, acc[1], this.bacBal[1] + 400);
     })
 });

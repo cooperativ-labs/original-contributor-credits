@@ -54,7 +54,7 @@ contract C2 is ERC20, Ownable {
     }
 
     function _backingNeededFor(uint256 amountC2) public view returns (uint256) {
-        return amountC2 * _bacBalance() / totalSupply(); 
+        return (amountC2 * _bacBalance()) / totalSupply(); 
     }
 
 }
