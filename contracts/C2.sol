@@ -8,25 +8,40 @@ import 'openzeppelin-solidity/contracts/access/Ownable.sol';
 contract C2 is ERC20, Ownable {
 
     IERC20 private _backingToken;
-    bool isLive = false;
+
+    bool _isLive = false;
+    modifier isLive() {
+        require(_isLive == true, "token must be established with a ratio first");
+        _;
+    }
+    modifier isNotLive() {
+        require(_isLive == false, "token is already established");
+        _;
+    }
 
     constructor(IERC20 backingToken) ERC20("ContributorCredits", "C^2") public {
         _backingToken = backingToken;
     }
 
-    function issue(address account, uint256 amount) public onlyOwner {
+    function establish(uint256 initialBac, uint256 initialC2) public onlyOwner isNotLive {
+        _backingToken.transferFrom(this.owner(), address(this), initialBac);
+        _mint(this.owner(), initialC2);
+        _isLive = true;
+    }
+
+    function issue(address account, uint256 amount) public onlyOwner isLive {
         uint256 backingNeeded = _backingNeededFor(amount);
         _backingToken.transferFrom(_msgSender(), address(this), backingNeeded);
         _mint(account, amount);
     }
 
-    function burn(uint256 amount) public {
+    function burn(uint256 amount) public isLive {
         uint256 associatedBacking = _backingNeededFor(amount);
         _backingToken.transfer(this.owner(), associatedBacking);
         _burn(_msgSender(), amount);
     }
 
-    function cashout(uint256 amount) public {
+    function cashout(uint256 amount) public isLive {
         uint256 associatedBacking = _backingNeededFor(amount);
         _backingToken.transfer(_msgSender(), associatedBacking);
         _burn(_msgSender(), amount);

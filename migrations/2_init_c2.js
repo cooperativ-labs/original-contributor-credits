@@ -6,7 +6,7 @@ module.exports = function(deployer, network, accounts) {
     if (network === "live") {
         /* TODO */
     } else {
-        deployer.deploy(BackingToken, accounts[0]).then(function() {
+        deployer.deploy(BackingToken, accounts[0]).then(() => {
             return deployer.deploy(C2, BackingToken.address);
         });
     }
