@@ -55,7 +55,7 @@ contract C2 is ERC20, Ownable {
     }
 
     function _backingNeededFor(uint256 amountC2) public view returns (uint256) {
-        // The -1 +1 is to get the ceiling division, rather than the floor so that you alway
+        // The -1 +1 is to get the ceiling division, rather than the floor so that you always err on the side of having more backing
         return amountC2.mul(_bacBalance()).sub(1).div(totalSupply()).add(1); 
     }
 
