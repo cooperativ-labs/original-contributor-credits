@@ -2,3 +2,6 @@ build/
 node_modules/
 *.swp
 *.log
+.gitsecret/keys/random_seed
+!*.secret
+secret.env
