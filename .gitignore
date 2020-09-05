@@ -4,4 +4,4 @@ node_modules/
 *.log
 .gitsecret/keys/random_seed
 !*.secret
-secret.env
+secrets.json
