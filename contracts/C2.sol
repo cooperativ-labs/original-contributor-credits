@@ -1,13 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.6.8;
 
+
 import 'openzeppelin-solidity/contracts/token/ERC20/ERC20.sol';
 import 'openzeppelin-solidity/contracts/token/ERC20/IERC20.sol';
 import 'openzeppelin-solidity/contracts/access/Ownable.sol';
+import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract C2 is ERC20, Ownable {
 
     IERC20 private _backingToken;
+    using SafeMath for uint256;
 
     bool _isLive = false;
     modifier isLive() {
@@ -52,7 +55,8 @@ contract C2 is ERC20, Ownable {
     }
 
     function _backingNeededFor(uint256 amountC2) public view returns (uint256) {
-        return amountC2 * _bacBalance() / totalSupply(); 
+        // The -1 +1 is to get the ceiling division, rather than the floor so that you alway
+        return amountC2.mul(_bacBalance()).sub(1).div(totalSupply()).add(1); 
     }
 
 }
