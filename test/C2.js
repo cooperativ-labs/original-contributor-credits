@@ -78,9 +78,9 @@ function testStakingRatio(establishBac, establishC2) {
         });
 
         it("should only allow the owner to issue tokens", async() => {
-            const amountToIssue = 1;
-            await this.bac.transfer(acc[1], amountToIssue);
-            await this.bac.approve(this.c2.address, amountToIssue, { from: acc[1] });
+            const c2ToIssue = 1;
+            await this.bac.transfer(acc[1], c2ToIssue);
+            await this.bac.approve(this.c2.address, c2ToIssue, { from: acc[1] });
             truffleAssert.reverts(this.c2.issue(acc[1], 1, { from: acc[1] }))
         });
 
