@@ -20,7 +20,12 @@
 
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const fs = require('fs');
-const {ROPSTEN_ACCOUNT_KEY, ROPSTEN_INFURA_KEY} = JSON.parse(fs.readFileSync("./secrets.json").toString().trim());
+
+try{
+  const {ROPSTEN_ACCOUNT_KEY, ROPSTEN_INFURA_KEY} = JSON.parse(fs.readFileSync("./secrets.json").toString().trim());
+} catch(err) {
+  const {ROPSTEN_ACCOUNT_KEY, ROPSTEN_INFURA_KEY} = {};
+}
 
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 
