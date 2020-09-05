@@ -15,10 +15,14 @@ const assertBalance = async (instance, addr, amount) => {
 function testStakingRatio(establishBac, establishC2) {
     const initialStakingRatio = establishBac/establishC2;
 
+    const equivBac = function(amountC2) {
+        return Math.ceil(amountC2 * initialStakingRatio);
+    }
+
     contract("C2", async (acc) => {
-        const issue = async (addr, amount) => {
+        const issueC2 = async (addr, amount) => {
             const backingNeeded = await this.c2._backingNeededFor.call(amount);
-            await this.bac.approve(this.c2.address, amount);
+            await this.bac.approve(this.c2.address, backingNeeded);
             await this.c2.issue(addr, amount);
         }
         
@@ -65,31 +69,40 @@ function testStakingRatio(establishBac, establishC2) {
             truffleAssert.reverts(this.c2.establish(establishBac, establishC2));
         })
 
+        it("correctly calculates equivalent bac", async () => {
+            for (c2Amount of [1, 2, 100, 12854, 324774, 234443, 25011]) {
+                const backingNeeded = await this.c2._backingNeededFor.call(c2Amount);
+                assert.equal(backingNeeded, equivBac(c2Amount))
+            }
+        })
+
         it("can issue tokens", async () => {
             const c2ToIssue = 1;
-            await issue(acc[1], c2ToIssue);
+            await issueC2(acc[1], c2ToIssue);
 
             await assertBalance(this.c2, acc[1], c2ToIssue);
-            await assertBalance(this.bac, acc[0], this.bacBal[0] - int(c2ToIssue * initialStakingRatio);
+            await assertBalance(this.bac, acc[0], this.bacBal[0] - equivBac(c2ToIssue));
         });
 
         it("must stake backing tokens to issue c2", async() => {
-            truffleAssert.reverts(this.c2.issue(acc[1], this.bacBal[0] + 1));
+            const c2ToIssue = 1;
+            truffleAssert.reverts(this.c2.issue(acc[1], c2ToIssue));
         });
 
         it("should only allow the owner to issue tokens", async() => {
-            const c2ToIssue = 1;
-            await this.bac.transfer(acc[1], c2ToIssue);
-            await this.bac.approve(this.c2.address, c2ToIssue, { from: acc[1] });
-            truffleAssert.reverts(this.c2.issue(acc[1], 1, { from: acc[1] }))
+            const c2ToIssue = 1000;
+            const bacNeeded = equivBac(c2ToIssue);
+            await this.bac.transfer(acc[1], bacNeeded);
+            await this.bac.approve(this.c2.address, bacNeeded, { from: acc[1] });
+            truffleAssert.reverts(this.c2.issue(acc[1], c2ToIssue, { from: acc[1] }))
         });
 
         it("can relinquish tokens", async() => {
             const amountToRelinquish = 5;
-            await issue(acc[1], amountToRelinquish);
+            await issueC2(acc[1], amountToRelinquish);
 
             await assertBalance(this.c2, acc[1], this.c2Bal[1] + amountToRelinquish);
-            await assertBalance(this.bac, acc[0], this.bacBal[0] - amountToRelinquish);
+            await assertBalance(this.bac, acc[0], this.bacBal[0] - equivBac(amountToRelinquish));
             
             await this.c2.burn(amountToRelinquish, { from: acc[1] });
 
@@ -100,14 +113,14 @@ function testStakingRatio(establishBac, establishC2) {
         it("can cash out", async() => {
             const amountToIssue = 11;
             const amountToCashOut = 7;
-            await issue(acc[2], amountToIssue);
+            await issueC2(acc[2], amountToIssue);
 
             await assertBalance(this.c2, acc[2], this.c2Bal[2] + amountToIssue);
 
             await this.c2.cashout(amountToCashOut, { from: acc[2] });
 
             await assertBalance(this.c2, acc[2], this.c2Bal[2] + amountToIssue - amountToCashOut);
-            await assertBalance(this.bac, acc[2], this.bacBal[2] + amountToCashOut);
+            await assertBalance(this.bac, acc[2], this.bacBal[2] + equivBac(amountToCashOut));
         });
     });
 }
