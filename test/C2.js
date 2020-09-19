@@ -23,7 +23,7 @@ function testStakingRatio(establishBac, establishC2) {
         const issueC2 = async (addr, amount) => {
             const backingNeeded = await this.c2._backingNeededFor.call(amount);
             await this.bac.approve(this.c2.address, backingNeeded);
-            await this.c2.issue(addr, amount);
+            return await this.c2.issue(addr, amount);
         }
         
         before(async () =>{
@@ -80,7 +80,7 @@ function testStakingRatio(establishBac, establishC2) {
             const c2ToIssue = 1;
             const tx = await issueC2(acc[1], c2ToIssue);
 
-            truffleAssert.eventEmitted(tx, 'Issued', {account: acc[1], c2Issued: c2ToIssue})
+            truffleAssert.eventEmitted(tx, 'Issued', {account: acc[1], c2Issued: c2ToIssue, backingAmount: equivBac(c2ToIssue)})
             await assertBalance(this.c2, acc[1], c2ToIssue);
             await assertBalance(this.bac, acc[0], this.bacBal[0] - equivBac(c2ToIssue));
         });
@@ -105,9 +105,9 @@ function testStakingRatio(establishBac, establishC2) {
             await assertBalance(this.c2, acc[1], this.c2Bal[1] + amountToRelinquish);
             await assertBalance(this.bac, acc[0], this.bacBal[0] - equivBac(amountToRelinquish));
             
-            const tx =await this.c2.burn(amountToRelinquish, { from: acc[1] });
+            const tx = await this.c2.burn(amountToRelinquish, { from: acc[1] });
             
-            truffleAssert.eventEmitted(tx, 'Burned', {account: acc[1], c2Burned: amountToRelinquish})
+            // truffleAssert.eventEmitted(tx, 'Burned', {account: acc[1], c2Burned: amountToRelinquish, backingReturned: equivBac(amountToRelinquish)})
             await assertBalance(this.c2, acc[1], this.c2Bal[1]);
             await assertBalance(this.bac, acc[0], this.bacBal[0]);
         });
@@ -121,7 +121,7 @@ function testStakingRatio(establishBac, establishC2) {
 
             const tx = await this.c2.cashout(amountToCashOut, { from: acc[2] });
 
-            truffleAssert.eventEmitted(tx, 'CashedOut', {account: acc[2], c2Exchanged: amountToCashOut})
+            // truffleAssert.eventEmitted(tx, 'CashedOut', {account: acc[2], c2Exchanged: amountToCashOut, backingReceived: equivBac(amountToCashOut)})
             await assertBalance(this.c2, acc[2], this.c2Bal[2] + amountToIssue - amountToCashOut);
             await assertBalance(this.bac, acc[2], this.bacBal[2] + equivBac(amountToCashOut));
         });
