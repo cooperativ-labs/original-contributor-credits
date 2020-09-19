@@ -43,6 +43,11 @@ function testStakingRatio(establishBac, establishC2) {
                     .map(x => getBalance(this.bac, acc[x]))
             );
         })
+
+        it("Can retrieve backing token address", async () => {
+          const address = await this.c2.backingToken();
+          assert.equal(this.bac.address, address);
+        })
     
         it("should issue BackingToken to account 0", async () => {
             const supply = await this.bac.totalSupply();

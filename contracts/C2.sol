@@ -32,6 +32,10 @@ contract C2 is ERC20, Ownable {
         _isLive = true;
     }
 
+    function backingToken() public view returns (address) {
+        return address(_backingToken);
+    }
+
     function issue(address account, uint256 amount) public onlyOwner isLive {
         uint256 backingNeeded = _backingNeededFor(amount);
         _backingToken.transferFrom(_msgSender(), address(this), backingNeeded);
@@ -56,7 +60,7 @@ contract C2 is ERC20, Ownable {
 
     function _backingNeededFor(uint256 amountC2) public view returns (uint256) {
         // The -1 +1 is to get the ceiling division, rather than the floor so that you always err on the side of having more backing
-        return amountC2.mul(_bacBalance()).sub(1).div(totalSupply()).add(1); 
+        return amountC2.mul(_bacBalance()).sub(1).div(totalSupply()).add(1);
     }
 
 }
