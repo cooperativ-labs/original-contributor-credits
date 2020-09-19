@@ -66,7 +66,7 @@ contract C2 is ERC20, Ownable {
     event CashedOut(
         address indexed account,
         uint256 c2Exchanged,
-        unit256 backingReceived
+        uint256 backingReceived
     );
 
     function cashout(uint256 amount) public isLive {
