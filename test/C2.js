@@ -44,6 +44,16 @@ function testStakingRatio(establishBac, establishC2) {
             );
         })
 
+        it("Can retrieve backing token address", async () => {
+          const address = await this.c2.backingToken();
+          assert.equal(this.bac.address, address);
+        })
+    
+        it("Can access version string", async () => {
+            const version = await this.c2.version.call();
+            assert.equal(version, "cc v0.1.0");
+        })
+
         it("should issue BackingToken to account 0", async () => {
             const supply = await this.bac.totalSupply();
             assert.isAbove(supply.toNumber(), 0);

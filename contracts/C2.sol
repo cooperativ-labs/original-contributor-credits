@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: GPL-3.0-only
 pragma solidity ^0.6.8;
 
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
@@ -7,6 +7,9 @@ import "openzeppelin-solidity/contracts/access/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract C2 is ERC20, Ownable {
+
+    string constant public version = "cc v0.1.0";
+
     IERC20 private _backingToken;
     using SafeMath for uint256;
 
@@ -35,6 +38,10 @@ contract C2 is ERC20, Ownable {
         _backingToken.transferFrom(this.owner(), address(this), initialBac);
         _mint(this.owner(), initialC2);
         _isLive = true;
+    }
+
+    function backingToken() public view returns (address) {
+        return address(_backingToken);
     }
 
     event Issued(
