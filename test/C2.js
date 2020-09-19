@@ -78,8 +78,9 @@ function testStakingRatio(establishBac, establishC2) {
 
         it("can issue tokens", async () => {
             const c2ToIssue = 1;
-            await issueC2(acc[1], c2ToIssue);
+            const tx = await issueC2(acc[1], c2ToIssue);
 
+            truffleAssert.eventEmitted(tx, 'Issued', {account: acc[1], c2Issued: c2ToIssue})
             await assertBalance(this.c2, acc[1], c2ToIssue);
             await assertBalance(this.bac, acc[0], this.bacBal[0] - equivBac(c2ToIssue));
         });
@@ -104,8 +105,9 @@ function testStakingRatio(establishBac, establishC2) {
             await assertBalance(this.c2, acc[1], this.c2Bal[1] + amountToRelinquish);
             await assertBalance(this.bac, acc[0], this.bacBal[0] - equivBac(amountToRelinquish));
             
-            await this.c2.burn(amountToRelinquish, { from: acc[1] });
-
+            const tx =await this.c2.burn(amountToRelinquish, { from: acc[1] });
+            
+            truffleAssert.eventEmitted(tx, 'Burned', {account: acc[1], c2Burned: amountToRelinquish})
             await assertBalance(this.c2, acc[1], this.c2Bal[1]);
             await assertBalance(this.bac, acc[0], this.bacBal[0]);
         });
@@ -117,8 +119,9 @@ function testStakingRatio(establishBac, establishC2) {
 
             await assertBalance(this.c2, acc[2], this.c2Bal[2] + amountToIssue);
 
-            await this.c2.cashout(amountToCashOut, { from: acc[2] });
+            const tx = await this.c2.cashout(amountToCashOut, { from: acc[2] });
 
+            truffleAssert.eventEmitted(tx, 'CashedOut', {account: acc[2], c2Exchanged: amountToCashOut})
             await assertBalance(this.c2, acc[2], this.c2Bal[2] + amountToIssue - amountToCashOut);
             await assertBalance(this.bac, acc[2], this.bacBal[2] + equivBac(amountToCashOut));
         });
