@@ -9,6 +9,8 @@ import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 contract C2 is ERC20, Ownable {
 
+    string constant version = "cc v0.1.0";
+
     IERC20 private _backingToken;
     using SafeMath for uint256;
 
