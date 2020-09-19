@@ -73,7 +73,7 @@ contract C2 is ERC20, Ownable {
         uint256 associatedBacking = _backingNeededFor(amount);
         _backingToken.transfer(_msgSender(), associatedBacking);
         _burn(_msgSender(), amount);
-        emit CashedOut(_msgSender(), amount, backingReturned);
+        emit CashedOut(_msgSender(), amount, associatedBacking);
     }
 
     function _bacBalance() internal view returns (uint256) {
