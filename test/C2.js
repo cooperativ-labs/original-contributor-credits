@@ -80,8 +80,9 @@ function testStakingRatio(establishBac, establishC2) {
             const c2ToIssue = 1;
             const tx = await issueC2(acc[1], c2ToIssue);
 
-            truffleAssert.eventEmitted(tx, 'Issued', (ev) => { 
-                return ev.account === acc[1] && ev.c2Issued.toNumber() === c2ToIssue && ev.backingAmount.toNumber() === equivBac(c2ToIssue) })
+            truffleAssert.eventEmitted(tx, 'Issued', (ev) => {
+                return ev.account === acc[1] && ev.c2Issued.toNumber() === c2ToIssue && ev.backingAmount.toNumber() === equivBac(c2ToIssue)
+            })
             await assertBalance(this.c2, acc[1], c2ToIssue);
             await assertBalance(this.bac, acc[0], this.bacBal[0] - equivBac(c2ToIssue));
         });
@@ -108,8 +109,9 @@ function testStakingRatio(establishBac, establishC2) {
 
             const tx = await this.c2.burn(amountToRelinquish, { from: acc[1] });
 
-            truffleAssert.eventEmitted(tx, 'Burned', (ev) =>{
-                return ev.account === acc[1] && ev.c2Burned.toNumber() === amountToRelinquish, ev.backingReturned.toNumber() === equivBac(amountToRelinquish)})
+            truffleAssert.eventEmitted(tx, 'Burned', (ev) => {
+                return ev.account === acc[1] && ev.c2Burned.toNumber() === amountToRelinquish, ev.backingReturned.toNumber() === equivBac(amountToRelinquish)
+            })
             await assertBalance(this.c2, acc[1], this.c2Bal[1]);
             await assertBalance(this.bac, acc[0], this.bacBal[0]);
         });
@@ -124,7 +126,8 @@ function testStakingRatio(establishBac, establishC2) {
             const tx = await this.c2.cashout(amountToCashOut, { from: acc[2] });
 
             truffleAssert.eventEmitted(tx, 'CashedOut', (ev) => {
-                return ev.account === acc[2], ev.c2Exchanged.toNumber() === amountToCashOut, ev.backingReceived.toNumber() === equivBac(amountToCashOut)})
+                return ev.account === acc[2], ev.c2Exchanged.toNumber() === amountToCashOut, ev.backingReceived.toNumber() === equivBac(amountToCashOut)
+            })
             await assertBalance(this.c2, acc[2], this.c2Bal[2] + amountToIssue - amountToCashOut);
             await assertBalance(this.bac, acc[2], this.bacBal[2] + equivBac(amountToCashOut));
         });
