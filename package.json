@@ -22,7 +22,8 @@
   "homepage": "https://github.com/sunshine-labs/cc-smart-contract#readme",
   "dependencies": {
     "@truffle/hdwallet-provider": "^1.0.43",
-    "openzeppelin-solidity": "3.1.0"
+    "openzeppelin-solidity": "3.1.0",
+    "web3": "^1.2.11"
   },
   "devDependencies": {
     "prettier": "2.0.5",

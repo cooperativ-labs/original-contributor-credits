@@ -20,12 +20,10 @@
 
 const HDWalletProvider = require('@truffle/hdwallet-provider');
 const fs = require('fs');
+const Web3 = require('web3');
+const web3 = new Web3();
 
-try{
-  const {ROPSTEN_ACCOUNT_KEY, ROPSTEN_INFURA_KEY} = JSON.parse(fs.readFileSync("./secrets.json").toString().trim());
-} catch(err) {
-  const {ROPSTEN_ACCOUNT_KEY, ROPSTEN_INFURA_KEY} = {};
-}
+const {ROPSTEN_ACCOUNT_KEY, INFURA_KEY, MAINNET_ACCOUNT_KEY} = fs.existsSync("secrets.json") ? JSON.parse(fs.readFileSync("secrets.json").toString().trim()) : {};
 
 // const mnemonic = fs.readFileSync(".secret").toString().trim();
 
@@ -64,12 +62,20 @@ module.exports = {
     // Useful for deploying to a public network.
     // NB: It's important to wrap the provider as a function.
     ropsten: {
-    provider: () => new HDWalletProvider(ROPSTEN_ACCOUNT_KEY, `https://ropsten.infura.io/v3/${ROPSTEN_INFURA_KEY}`),
+    provider: () => new HDWalletProvider(ROPSTEN_ACCOUNT_KEY, `https://ropsten.infura.io/v3/${INFURA_KEY}`),
     network_id: 3,       // Ropsten's id
-    gas: 5500000,        // Ropsten has a lower block limit than mainnet
-    confirmations: 2,    // # of confs to wait between deployments. (default: 0)
+    gas: 4000000,        // Ropsten has a lower block limit than mainnet
     timeoutBlocks: 200,  // # of blocks before a deployment times out  (minimum/default: 50)
-    skipDryRun: true     // Skip dry run before migrations? (default: false for public nets )
+    skipDryRun: true,     // Skip dry run before migrations? (default: false for public nets )
+    gasPrice: web3.utils.toWei('225', 'gwei')
+  },
+    live: {
+      provider: () => new HDWalletProvider(MAINNET_ACCOUNT_KEY, `https://mainnet.infura.io/v3/${INFURA_KEY}`),
+      network_id: 1,       // Ropsten's id
+      gas: 4000000,        // Ropsten has a lower block limit than mainnet
+      confirmations: 2,    // # of confs to wait between deployments. (default: 0)
+      timeoutBlocks: 2000,  // # of blocks before a deployment times out  (minimum/default: 50)
+      gasPrice: web3.utils.toWei('225', 'gwei')
     },
     // Useful for private networks
     // private: {
