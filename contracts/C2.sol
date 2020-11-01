@@ -7,8 +7,7 @@ import "openzeppelin-solidity/contracts/access/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract C2 is ERC20, Ownable {
-
-    string constant public version = "cc v0.1.0";
+    string public constant version = "cc v0.1.0";
 
     IERC20 private _backingToken;
     using SafeMath for uint256;
@@ -89,6 +88,10 @@ contract C2 is ERC20, Ownable {
 
     function _backingNeededFor(uint256 amountC2) public view returns (uint256) {
         // The -1 +1 is to get the ceiling division, rather than the floor so that you always err on the side of having more backing
-        return amountC2.mul(_bacBalance()).sub(1).div(totalSupply()).add(1);
+        if (_bacBalance() == 0) {
+            return 0;
+        } else {
+            return amountC2.mul(_bacBalance()).sub(1).div(totalSupply()).add(1);
+        }
     }
 }
