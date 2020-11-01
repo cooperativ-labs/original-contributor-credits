@@ -103,7 +103,7 @@ function testStakingRatio(establishBac, establishC2) {
                 truffleAssert.reverts(this.c2.issue(acc[1], c2ToIssue));
             });
         } else {
-            it("it can issue c2 for free", async () => {
+            it("can issue c2 for free", async () => {
                 const c2ToIssue = 1;
                 this.c2.issue(acc[1], c2ToIssue)
                 await assertBalance(this.c2, acc[1], this.c2Bal[1] + c2ToIssue)
