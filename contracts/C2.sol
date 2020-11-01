@@ -7,7 +7,7 @@ import "openzeppelin-solidity/contracts/access/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract C2 is ERC20, Ownable {
-    string public constant version = "cc v0.1.0";
+    string public constant version = "cc v0.1.1";
 
     IERC20 private _backingToken;
     using SafeMath for uint256;
