@@ -1,6 +1,7 @@
 const C2 = artifacts.require("C2");
 const BackingToken = artifacts.require("BackingToken");
 const truffleAssert = require('truffle-assertions');
+const BN = require('bn.js')
 
 
 const getBalance = async (instance, addr) => {
@@ -19,7 +20,7 @@ function testStakingRatio(establishBac, establishC2) {
         return Math.ceil(amountC2 * initialStakingRatio);
     }
 
-    contract("C2", async (acc) => {
+    contract.skip("C2", async (acc) => {
         const issueC2 = async (addr, amount) => {
             const backingNeeded = await this.c2._backingNeededFor.call(amount);
             await this.bac.approve(this.c2.address, backingNeeded);
@@ -27,8 +28,10 @@ function testStakingRatio(establishBac, establishC2) {
         }
 
         before(async () => {
-            this.c2 = await C2.deployed();
+            BackingToken.new(acc[0], 18)
             this.bac = await BackingToken.deployed();
+            C2.new(this.bac.address)
+            this.c2 = await C2.deployed();
         })
 
         beforeEach(async () => {
@@ -164,20 +167,52 @@ function testStakingRatio(establishBac, establishC2) {
             });
         }
     });
+
+    for (bacDecimals of [18, 21, 15, 6]) {
+        contract("C2 backed by ${bacDecimals}-decimal BAC", async (acc) => {
+            before(async () => {
+                // deploy new contracts (overrides the decimals on BAC)
+                this.bac = await BackingToken.new(acc[0], bacDecimals, { from: acc[0] });
+                this.c2 = await C2.new(this.bac.address, { from: acc[0] });
+
+                this.c2Decimals = await this.c2.decimals.call()
+                this.bacDecimals = await this.bac.decimals.call()
+                this.deltaDecimals = bacDecimals.sub(c2Decimals);
+
+                // Adjust establishing amounts so that the funding ratio stays correct
+                const minDecimals = BN.min(this.bacDecimals, this.c2Decimals)
+                const adjEstablishBac = new BN(establishBac).mul(new BN(10).pow(bacDecimals.sub(minDecimals)))
+                const adjEstablishC2 = new BN(establishC2).mul(new BN(10).pow(c2Decimals.sub(minDecimals)))
+
+                // establish
+                await this.bac.approve(this.c2.address, adjEstablishBac);
+                await this.c2.establish(adjEstablishBac, adjEstablishC2);
+            });
+            
+            it(`gives accurate funding data when BAC has ${bacDecimals} decimals`, async () => {
+                const totalC2 = await this.c2.totalSupply();
+                const expectedBacForFunded = (this.deltaDecimals >= 0 ) ? totalC2.mul(new BN(10).pow(this.deltaDecimals)) : (totalC2.divmod(new BN(10).pow(this.deltaDecimals))).div
+                const realBacForFunded = await this.c2._totalBackingNeededToFund.call();
+
+                assert.strictEqual(realBacForFunded, expectedBacForFunded);
+            });
+            
+        });
+    }
 }
 
 describe("100% inital staking ratio", () => {
     testStakingRatio(100, 100)
 });
 
-describe("10% intial staking ratio", () => {
-    testStakingRatio(100, 1000)
-});
+// describe("10% intial staking ratio", () => {
+//     testStakingRatio(100, 1000)
+// });
 
-describe("1% initial staking ratio", () => {
-    testStakingRatio(50, 5000)
-});
+// describe("1% initial staking ratio", () => {
+//     testStakingRatio(50, 5000)
+// });
 
-describe("0% initial staking ratio", () => {
-    testStakingRatio(0, 5000)
-});
+// describe("0% initial staking ratio", () => {
+//     testStakingRatio(0, 5000)
+// });
