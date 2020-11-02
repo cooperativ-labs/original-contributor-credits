@@ -92,14 +92,22 @@ function testStakingRatio(establishBac, establishC2) {
             truffleAssert.eventEmitted(tx, 'Issued', (ev) => {
                 return ev.account === acc[1] && ev.c2Issued.toNumber() === c2ToIssue && ev.backingAmount.toNumber() === equivBac(c2ToIssue)
             })
-            await assertBalance(this.c2, acc[1], c2ToIssue);
+            await assertBalance(this.c2, acc[1], this.c2Bal[1] + c2ToIssue);
             await assertBalance(this.bac, acc[0], this.bacBal[0] - equivBac(c2ToIssue));
         });
 
-        it("must stake backing tokens to issue c2", async () => {
-            const c2ToIssue = 1;
-            truffleAssert.reverts(this.c2.issue(acc[1], c2ToIssue));
-        });
+        if (initialStakingRatio > 0){
+            it("must stake backing tokens to issue c2", async () => {
+                const c2ToIssue = 1;
+                truffleAssert.reverts(this.c2.issue(acc[1], c2ToIssue));
+            });
+        } else {
+            it("can issue c2 for free", async () => {
+                const c2ToIssue = 1;
+                this.c2.issue(acc[1], c2ToIssue)
+                await assertBalance(this.c2, acc[1], this.c2Bal[1] + c2ToIssue)
+            })
+        }
 
         it("should only allow the owner to issue tokens", async () => {
             const c2ToIssue = 1000;
@@ -168,4 +176,8 @@ describe("10% intial staking ratio", () => {
 
 describe("1% initial staking ratio", () => {
     testStakingRatio(50, 5000)
+});
+
+describe("0% initial staking ratio", () => {
+    testStakingRatio(0, 5000)
 });
