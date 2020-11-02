@@ -29,7 +29,6 @@ function testStakingRatio(establishBac, establishC2) {
         before(async () => {
             this.c2 = await C2.deployed();
             this.bac = await BackingToken.deployed();
-            this.testAccountIndex = 0;
         })
 
         beforeEach(async () => {
@@ -51,10 +50,10 @@ function testStakingRatio(establishBac, establishC2) {
     
         it("Can access version string", async () => {
             const version = await this.c2.version.call();
-            assert.equal(version, "cc v0.1.0");
+            assert.equal(version, "cc v0.1.2");
         })
 
-        it("should issue BackingToken to account 0", async () => {
+        it("issues BackingToken to account 0 in the migration", async () => {
             const supply = await this.bac.totalSupply();
             assert.isAbove(supply.toNumber(), 0);
             assert.equal(this.bacBal[0], supply.toNumber());
@@ -141,6 +140,21 @@ function testStakingRatio(establishBac, establishC2) {
             await assertBalance(this.c2, acc[2], this.c2Bal[2] + amountToIssue - amountToCashOut);
             await assertBalance(this.bac, acc[2], this.bacBal[2] + equivBac(amountToCashOut));
         });
+
+        if("requires the totalC2 amount of BAC to be funded", async () => {
+            const totalC2 = this.c2._totalSupply()
+                assert.strictEqual(backingNeeded, totalC2)
+        })
+
+        if (initialStakingRatio >= 1) {
+            it("is already fully funded", async () => {
+                assert.isTrue(await this.c2._isFunded.call())
+            })
+        } else {
+            it("requires BAC to be funded", async () => {
+                assert.isFalse(await this.c2._isFunded.call())
+            });
+        }
     });
 }
 
@@ -154,4 +168,4 @@ describe("10% intial staking ratio", () => {
 
 describe("1% initial staking ratio", () => {
     testStakingRatio(50, 5000)
-})
+});
