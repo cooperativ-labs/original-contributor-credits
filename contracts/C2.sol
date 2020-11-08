@@ -51,8 +51,8 @@ contract C2 is ERC20, Ownable {
 
     function issue(address account, uint256 amount) public onlyOwner isLive {
         uint256 backingNeeded = _backingNeededFor(amount);
-        _backingToken.transferFrom(_msgSender(), address(this), backingNeeded);
         _mint(account, amount);
+        _backingToken.transferFrom(_msgSender(), address(this), backingNeeded);
         emit Issued(account, amount, backingNeeded);
     }
 
@@ -64,8 +64,8 @@ contract C2 is ERC20, Ownable {
 
     function burn(uint256 amount) public isLive {
         uint256 associatedBacking = _backingNeededFor(amount);
-        _backingToken.transfer(this.owner(), associatedBacking);
         _burn(_msgSender(), amount);
+        _backingToken.transfer(this.owner(), associatedBacking);
         emit Burned(_msgSender(), amount, associatedBacking);
     }
 
@@ -77,8 +77,8 @@ contract C2 is ERC20, Ownable {
 
     function cashout(uint256 amount) public isLive {
         uint256 associatedBacking = _backingNeededFor(amount);
-        _backingToken.transfer(_msgSender(), associatedBacking);
         _burn(_msgSender(), amount);
+        _backingToken.transfer(_msgSender(), associatedBacking);
         emit CashedOut(_msgSender(), amount, associatedBacking);
     }
 

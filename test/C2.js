@@ -59,12 +59,14 @@ function testStakingRatio(establishBac, establishC2) {
         })
 
         it("needs to be established first", async () => {
+            assert.isFalse(await this.c2._isLive.call())
             await this.bac.approve(this.c2.address, establishBac);
             // not established yet so this reverts
             truffleAssert.reverts(this.c2.issue(acc[0], establishC2));
 
             await this.c2.establish(this.bac.address, establishBac, establishC2)
 
+            assert.isTrue(await this.c2._isLive.call())
             await assertBalance(this.c2, acc[0], establishC2)
             assert.equal(await this.c2.totalSupply.call(), establishC2)
 
