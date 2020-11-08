@@ -26,6 +26,6 @@ contract BackingToken15 is ERC20 {
 contract BackingToken6 is ERC20 {
     constructor(address account) ERC20("BackingToken", "BAC6") public {
         _mint(account, 1000000000000000);
-        _setupDecimals(15);
+        _setupDecimals(6);
     }
 }
