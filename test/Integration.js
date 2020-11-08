@@ -1,6 +1,7 @@
 const C2 = artifacts.require("C2");
 const BackingToken = artifacts.require("BackingToken");
 const truffleAssert = require("truffle-assertions");
+const agreementHash = '0x9e058097cb6c2dcbfa44b5d97f28bf729eed745cb6a061ceea7176cb14d77296'
 
 // Owner - Owner
 // Contributor - Con1, Con2, Con3
@@ -40,7 +41,7 @@ contract("Integration_Test", async (acc) => {
     const establishBac = 1;
     const establishC2 = 100;
     await this.bac.approve(this.c2.address, establishBac);
-    await this.c2.establish(this.bac.address, establishBac, establishC2);
+    await this.c2.establish(this.bac.address, establishBac, establishC2, agreementHash);
 
     await assertBalance(this.c2, acc[0], establishC2);
   });
