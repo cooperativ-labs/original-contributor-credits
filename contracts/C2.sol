@@ -25,15 +25,15 @@ contract C2 is ERC20, Ownable {
         _;
     }
 
-    constructor(ERC20 backingToken) public ERC20("ContributorCredits", "C^2") {
-        _backingToken = backingToken;
+    constructor() public ERC20("ContributorCredits", "C^2") {
     }
 
-    function establish(uint256 initialBac, uint256 initialC2)
+    function establish(ERC20 backingToken, uint256 initialBac, uint256 initialC2)
         public
         onlyOwner
         isNotLive
     {
+        _backingToken = backingToken;
         _backingToken.transferFrom(this.owner(), address(this), initialBac);
         _mint(this.owner(), initialC2);
         _isLive = true;
