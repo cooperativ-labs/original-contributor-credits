@@ -12,7 +12,7 @@ contract C2 is ERC20, Ownable {
     IERC20 private _backingToken;
     using SafeMath for uint256;
 
-    bool _isLive = false;
+    bool public _isLive = false;
     modifier isLive() {
         require(
             _isLive == true,
