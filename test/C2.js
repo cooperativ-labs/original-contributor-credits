@@ -25,7 +25,7 @@ function testStakingRatio(establishBac, establishC2) {
 
     contract("C2", async (acc) => {
         const issueC2 = async (addr, amount) => {
-            const backingNeeded = await this.c2._backingNeededFor.call(amount);
+            const backingNeeded = await this.c2.backingNeededFor.call(amount);
             await this.bac.approve(this.c2.address, backingNeeded);
             return await this.c2.issue(addr, amount);
         }
@@ -59,14 +59,14 @@ function testStakingRatio(establishBac, establishC2) {
         })
 
         it("needs to be established first", async () => {
-            assert.isFalse(await this.c2._isLive.call())
+            assert.isFalse(await this.c2.isEstablished.call())
             await this.bac.approve(this.c2.address, establishBac);
             // not established yet so this reverts
             truffleAssert.reverts(this.c2.issue(acc[0], establishC2));
 
             await this.c2.establish(this.bac.address, establishBac, establishC2)
 
-            assert.isTrue(await this.c2._isLive.call())
+            assert.isTrue(await this.c2.isEstablished.call())
             await assertBalance(this.c2, acc[0], establishC2)
             assert.equal(await this.c2.totalSupply.call(), establishC2)
 
@@ -86,7 +86,7 @@ function testStakingRatio(establishBac, establishC2) {
 
         it("correctly calculates equivalent bac", async () => {
             for (c2Amount of [1, 2, 100, 12854, 324774, 234443, 25011]) {
-                const backingNeeded = await this.c2._backingNeededFor.call(c2Amount);
+                const backingNeeded = await this.c2.backingNeededFor.call(c2Amount);
                 assert.equal(backingNeeded, equivBac(c2Amount))
             }
         })
@@ -157,7 +157,7 @@ function testStakingRatio(establishBac, establishC2) {
 
         it("requires the totalC2 amount of BAC to be funded", async () => {
             const totalC2 = await this.c2.totalSupply()
-            const backingNeeded = await this.c2._totalBackingNeededToFund.call()
+            const backingNeeded = await this.c2.totalBackingNeededToFund.call()
             assert.isTrue(backingNeeded.eq(totalC2))
         })
     });
@@ -189,18 +189,18 @@ function testBacDecimals(bacContract, bacDec, establishBac, establishC2) {
         it(`gives accurate funding data when BAC has ${bacDec} decimals`, async () => {
             const totalC2 = await this.c2.totalSupply();
             const expectedBacForFunded = (this.deltaDecimals >= 0 ) ? totalC2.mul(new BN(10).pow(this.deltaDecimals)) : (totalC2.divmod(new BN(10).pow(this.deltaDecimals))).div
-            const realBacForFunded = await this.c2._totalBackingNeededToFund.call();
+            const realBacForFunded = await this.c2.totalBackingNeededToFund.call();
 
             assert.isTrue(realBacForFunded.eq(expectedBacForFunded));
         });
 
         if (initialStakingRatio >= 1) {
             it("is already fully funded", async () => {
-                assert.isTrue(await this.c2._isFunded.call())
+                assert.isTrue(await this.c2.isFunded.call())
             })
         } else {
             it("requires BAC to be funded", async () => {
-                assert.isFalse(await this.c2._isFunded.call())
+                assert.isFalse(await this.c2.isFunded.call())
             });
         }
         

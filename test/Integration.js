@@ -18,7 +18,7 @@ const assertBalance = async (instance, addr, amount) => {
 
 contract("Integration_Test", async (acc) => {
     const issueAmount = async (addr, amount) => {
-        const backingNeeded = await this.c2._backingNeededFor.call(amount);
+        const backingNeeded = await this.c2.backingNeededFor.call(amount);
         await this.bac.approve(this.c2.address, backingNeeded);
         await this.c2.issue(addr, amount);
     }
@@ -79,7 +79,7 @@ contract("Integration_Test", async (acc) => {
 
         const c2 = await this.c2.totalSupply.call();
         await assertBalance(this.bac, this.c2.address, 4);
-        const ratio = await this.c2._backingNeededFor.call(100);
+        const ratio = await this.c2.backingNeededFor.call(100);
 
         assert.equal(c2, 200);
         assert.equal(ratio, 2);
@@ -113,7 +113,7 @@ contract("Integration_Test", async (acc) => {
 
         const c2 = await this.c2.totalSupply.call();
         await assertBalance(this.bac, this.c2.address, 30);
-        const ratio = await this.c2._backingNeededFor.call(100);
+        const ratio = await this.c2.backingNeededFor.call(100);
 
         assert.equal(c2, 300);
         assert.equal(ratio, 10);
@@ -147,7 +147,7 @@ contract("Integration_Test", async (acc) => {
 
         const c2 = await this.c2.totalSupply.call();
         await assertBalance(this.bac, this.c2.address, 400);
-        const ratio = await this.c2._backingNeededFor.call(100);
+        const ratio = await this.c2.backingNeededFor.call(100);
 
         assert.equal(c2, 400);
         assert.equal(ratio, 100);

@@ -9,38 +9,34 @@ import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 contract C2 is ERC20, Ownable {
     string public constant version = "cc v0.1.2";
 
-    ERC20 private _backingToken;
+    ERC20 public backingToken;
     using SafeMath for uint256;
 
-    bool public _isLive = false;
+    bool public isEstablished = false;
     modifier isLive() {
         require(
-            _isLive == true,
+            isEstablished == true,
             "token must be established with a ratio first"
         );
         _;
     }
     modifier isNotLive() {
-        require(_isLive == false, "token is already established");
+        require(isEstablished == false, "token is already established");
         _;
     }
 
     constructor() public ERC20("ContributorCredits", "C^2") {
     }
 
-    function establish(ERC20 backingToken, uint256 initialBac, uint256 initialC2)
+    function establish(ERC20 backingTokenAddress, uint256 initialBac, uint256 initialC2)
         public
         onlyOwner
         isNotLive
     {
-        _backingToken = backingToken;
-        _backingToken.transferFrom(this.owner(), address(this), initialBac);
+        backingToken = backingTokenAddress;
+        backingToken.transferFrom(this.owner(), address(this), initialBac);
         _mint(this.owner(), initialC2);
-        _isLive = true;
-    }
-
-    function backingToken() public view returns (address) {
-        return address(_backingToken);
+        isEstablished = true;
     }
 
     event Issued(
@@ -50,9 +46,9 @@ contract C2 is ERC20, Ownable {
     );
 
     function issue(address account, uint256 amount) public onlyOwner isLive {
-        uint256 backingNeeded = _backingNeededFor(amount);
+        uint256 backingNeeded = backingNeededFor(amount);
         _mint(account, amount);
-        _backingToken.transferFrom(_msgSender(), address(this), backingNeeded);
+        backingToken.transferFrom(_msgSender(), address(this), backingNeeded);
         emit Issued(account, amount, backingNeeded);
     }
 
@@ -63,9 +59,9 @@ contract C2 is ERC20, Ownable {
     );
 
     function burn(uint256 amount) public isLive {
-        uint256 associatedBacking = _backingNeededFor(amount);
+        uint256 associatedBacking = backingNeededFor(amount);
         _burn(_msgSender(), amount);
-        _backingToken.transfer(this.owner(), associatedBacking);
+        backingToken.transfer(this.owner(), associatedBacking);
         emit Burned(_msgSender(), amount, associatedBacking);
     }
 
@@ -76,36 +72,36 @@ contract C2 is ERC20, Ownable {
     );
 
     function cashout(uint256 amount) public isLive {
-        uint256 associatedBacking = _backingNeededFor(amount);
+        uint256 associatedBacking = backingNeededFor(amount);
         _burn(_msgSender(), amount);
-        _backingToken.transfer(_msgSender(), associatedBacking);
+        backingToken.transfer(_msgSender(), associatedBacking);
         emit CashedOut(_msgSender(), amount, associatedBacking);
     }
 
-    function _bacBalance() internal view returns (uint256) {
-        return _backingToken.balanceOf(address(this));
+    function bacBalance() public view returns (uint256) {
+        return backingToken.balanceOf(address(this));
     }
 
-    function _backingNeededFor(uint256 amountC2) public view returns (uint256) {
+    function backingNeededFor(uint256 amountC2) public view returns (uint256) {
         // The -1 +1 is to get the ceiling division, rather than the floor so that you always err on the side of having more backing
-        if (_bacBalance() == 0) {
+        if (bacBalance() == 0) {
             return 0;
         } else {
-            return amountC2.mul(_bacBalance()).sub(1).div(totalSupply()).add(1);
+            return amountC2.mul(bacBalance()).sub(1).div(totalSupply()).add(1);
         }
     }
 
-    function _totalBackingNeededToFund() public view returns (uint256) {
+    function totalBackingNeededToFund() public view returns (uint256) {
         // decimals normalization
-        if (decimals() > _backingToken.decimals()) {
+        if (decimals() > backingToken.decimals()) {
             // ceiling division
-            return (totalSupply().sub(1)).div(uint256(10) ** (decimals() - _backingToken.decimals())).add(1);
+            return (totalSupply().sub(1)).div(uint256(10) ** (decimals() - backingToken.decimals())).add(1);
         } else {
-            return totalSupply().mul(uint256(10) ** (_backingToken.decimals() - decimals()));
+            return totalSupply().mul(uint256(10) ** (backingToken.decimals() - decimals()));
         }
     }
 
-    function _isFunded() public view returns (bool) {
-        return _bacBalance() >= _totalBackingNeededToFund();
+    function isFunded() public view returns (bool) {
+        return bacBalance() >= totalBackingNeededToFund();
     }
 }
