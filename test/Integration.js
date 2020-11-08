@@ -26,7 +26,6 @@ contract("Integration_Test", async (acc) => {
     before(async () =>{
         this.c2 = await C2.deployed();
         this.bac = await BackingToken.deployed();
-        this.testAccountIndex = 0;
     })
 
     beforeEach(async () => {
@@ -45,7 +44,7 @@ contract("Integration_Test", async (acc) => {
         const establishBac = 1;
         const establishC2 = 100;
         await this.bac.approve(this.c2.address, establishBac);
-        await this.c2.establish(establishBac, establishC2)
+        await this.c2.establish(this.bac.address, establishBac, establishC2)
         
         await assertBalance(this.c2, acc[0], establishC2)
     })

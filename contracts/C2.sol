@@ -7,9 +7,9 @@ import "openzeppelin-solidity/contracts/access/Ownable.sol";
 import "openzeppelin-solidity/contracts/math/SafeMath.sol";
 
 contract C2 is ERC20, Ownable {
-    string public constant version = "cc v0.1.1";
+    string public constant version = "cc v0.1.2";
 
-    IERC20 private _backingToken;
+    ERC20 private _backingToken;
     using SafeMath for uint256;
 
     bool public _isLive = false;
@@ -25,15 +25,15 @@ contract C2 is ERC20, Ownable {
         _;
     }
 
-    constructor(IERC20 backingToken) public ERC20("ContributorCredits", "C^2") {
-        _backingToken = backingToken;
+    constructor() public ERC20("ContributorCredits", "C^2") {
     }
 
-    function establish(uint256 initialBac, uint256 initialC2)
+    function establish(ERC20 backingToken, uint256 initialBac, uint256 initialC2)
         public
         onlyOwner
         isNotLive
     {
+        _backingToken = backingToken;
         _backingToken.transferFrom(this.owner(), address(this), initialBac);
         _mint(this.owner(), initialC2);
         _isLive = true;
@@ -93,5 +93,19 @@ contract C2 is ERC20, Ownable {
         } else {
             return amountC2.mul(_bacBalance()).sub(1).div(totalSupply()).add(1);
         }
+    }
+
+    function _totalBackingNeededToFund() public view returns (uint256) {
+        // decimals normalization
+        if (decimals() > _backingToken.decimals()) {
+            // ceiling division
+            return (totalSupply().sub(1)).div(uint256(10) ** (decimals() - _backingToken.decimals())).add(1);
+        } else {
+            return totalSupply().mul(uint256(10) ** (_backingToken.decimals() - decimals()));
+        }
+    }
+
+    function _isFunded() public view returns (bool) {
+        return _bacBalance() >= _totalBackingNeededToFund();
     }
 }
