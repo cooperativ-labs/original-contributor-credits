@@ -5,6 +5,8 @@ var BackingToken15 = artifacts.require("BackingToken15");
 var BackingToken6 = artifacts.require("BackingToken6");
 const truffleAssert = require("truffle-assertions");
 const BN = require("bn.js");
+const agreementHash =
+  "0x9e058097cb6c2dcbfa44b5d97f28bf729eed745cb6a061ceea7176cb14d77296";
 
 const getBalance = async (instance, addr) => {
   const bal = await instance.balanceOf.call(addr);
@@ -61,7 +63,12 @@ function testStakingRatio(establishBac, establishC2) {
       // not established yet so this reverts
       truffleAssert.reverts(this.c2.issue(acc[0], establishC2));
 
-      await this.c2.establish(this.bac.address, establishBac, establishC2);
+      await this.c2.establish(
+        this.bac.address,
+        establishBac,
+        establishC2,
+        agreementHash
+      );
 
       assert.isTrue(await this.c2.isEstablished.call());
       await assertBalance(this.c2, acc[0], establishC2);
@@ -74,13 +81,23 @@ function testStakingRatio(establishBac, establishC2) {
     it("cannot be established twice", async () => {
       await this.bac.approve(this.c2.address, establishBac);
       truffleAssert.reverts(
-        this.c2.establish(this.bac.address, establishBac, establishC2)
+        this.c2.establish(
+          this.bac.address,
+          establishBac,
+          establishC2,
+          agreementHash
+        )
       );
     });
 
-    it("Can retrieve backing token address", async () => {
-      const address = await this.c2.backingToken();
+    it("can retrieve backing token address", async () => {
+      const address = await this.c2.backingToken.call();
       assert.equal(this.bac.address, address);
+    });
+
+    it("can retrieve agreement hash", async () => {
+      const agreement = await this.c2.agreementHash.call();
+      assert.equal(agreementHash, agreement);
     });
 
     it("correctly calculates equivalent bac", async () => {
@@ -217,7 +234,8 @@ function testBacDecimals(bacContract, bacDec, establishBac, establishC2) {
       await this.c2.establish(
         this.bac.address,
         adjEstablishBac,
-        adjEstablishC2
+        adjEstablishC2,
+        agreementHash
       );
     });
 
