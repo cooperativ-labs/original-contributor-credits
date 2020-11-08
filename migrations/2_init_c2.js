@@ -7,7 +7,7 @@ const BackingToken6 = artifacts.require("BackingToken6");
 module.exports = function (deployer, network, accounts) {
   if (network === "live" || network === "live-fork") {
     return deployer.deploy(C2);
-  } else if(network === "ropsten") {
+  } else if (network === "ropsten") {
     deployer.deploy(BackingToken, accounts[0]);
     return deployer.deploy(C2);
   } else {
