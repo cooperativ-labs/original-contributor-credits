@@ -169,7 +169,7 @@ function testStakingRatio(establishBac, establishC2) {
     });
 
     for (bacDecimals of [18, 21, 15, 6]) {
-        contract("C2 backed by ${bacDecimals}-decimal BAC", async (acc) => {
+        contract(`C2 backed by ${bacDecimals}-decimal BAC`, async (acc) => {
             before(async () => {
                 // deploy new contracts (overrides the decimals on BAC)
                 this.bac = await BackingToken.new(acc[0], bacDecimals, { from: acc[0] });

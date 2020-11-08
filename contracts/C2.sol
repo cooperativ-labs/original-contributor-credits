@@ -99,7 +99,7 @@ contract C2 is ERC20, Ownable {
         // decimals normalization
         if (decimals() > _backingToken.decimals()) {
             // ceiling division
-            return (totalSupply().sub(1)).div(uint256(10) ** decimals() - _backingToken.decimals()).add(1);
+            return (totalSupply().sub(1)).div(uint256(10) ** (decimals() - _backingToken.decimals())).add(1);
         } else {
             return totalSupply().mul(uint256(10) ** (_backingToken.decimals() - decimals()));
         }
