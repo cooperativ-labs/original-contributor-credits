@@ -7,6 +7,10 @@ contract BackingToken is ERC20 {
     constructor(address account) ERC20("BackingToken", "BAC") public {
         _mint(account, 1000000000000000);
     }
+
+    function mint(uint256 amount) public {
+        _mint(_msgSender(), amount);
+    }
 }
 
 contract BackingToken21 is ERC20 {
