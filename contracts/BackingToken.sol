@@ -18,10 +18,6 @@ contract BackingToken21 is ERC20 {
         _mint(account, 1000000000000000);
         _setupDecimals(21);
     }
-
-    function mint(uint256 amount) public {
-        _mint(_msgSender(), amount);
-    }
 }
 
 contract BackingToken15 is ERC20 {
@@ -29,16 +25,30 @@ contract BackingToken15 is ERC20 {
         _mint(account, 1000000000000000);
         _setupDecimals(15);
     }
-
-    function mint(uint256 amount) public {
-        _mint(_msgSender(), amount);
-    }
 }
 
 contract BackingToken6 is ERC20 {
     constructor(address account) ERC20("BackingToken", "BAC6") public {
         _mint(account, 1000000000000000);
         _setupDecimals(6);
+    }
+}
+
+contract TestUSDC is ERC20 {
+    constructor(address account) ERC20("USD Coin Test", "USDC*") public {
+        _mint(account, 1000000000000000);
+        _setupDecimals(6);
+    }
+
+    function mint(uint256 amount) public {
+        _mint(_msgSender(), amount);
+    }
+}
+
+contract TestDAI is ERC20 {
+    constructor(address account) ERC20("Dai Stablecoin Test", "DAI*") public {
+        _mint(account, 1000000000000000);
+        _setupDecimals(18);
     }
 
     function mint(uint256 amount) public {
