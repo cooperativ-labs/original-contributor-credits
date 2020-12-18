@@ -9,6 +9,7 @@ module.exports = function (deployer, network, accounts) {
     return deployer.deploy(C2);
   } else if (network === "ropsten") {
     deployer.deploy(BackingToken, accounts[0]);
+    deployer.deploy(BackingToken6, accounts[0]);
     return deployer.deploy(C2);
   } else {
     deployer.deploy(BackingToken, accounts[0]);
