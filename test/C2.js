@@ -32,8 +32,27 @@ function testStakingRatio(establishBac, establishC2) {
     };
 
     before(async () => {
+      // deploy
       this.bac = await BackingToken.deployed();
       this.c2 = await C2.deployed();
+
+      // establish
+      assert.isFalse(await this.c2.isEstablished.call());
+      await this.bac.approve(this.c2.address, establishBac);
+      truffleAssert.reverts(this.c2.issue(acc[0], establishC2));
+
+      await this.c2.establish(
+        this.bac.address,
+        establishBac,
+        establishC2,
+        agreementHash
+      );
+
+      assert.isTrue(await this.c2.isEstablished.call());
+      await assertBalance(this.c2, acc[0], establishC2);
+      assert.equal(await this.c2.totalSupply.call(), establishC2);
+
+      await assertBalance(this.bac, this.c2.address, establishBac);
     });
 
     beforeEach(async () => {
@@ -49,33 +68,6 @@ function testStakingRatio(establishBac, establishC2) {
     it("Can access version string", async () => {
       const version = await this.c2.version.call();
       assert.equal(version, "cc v0.1.2");
-    });
-
-    it("issues BackingToken to account 0 in the migration", async () => {
-      const supply = await this.bac.totalSupply();
-      assert.isAbove(supply.toNumber(), 0);
-      assert.equal(this.bacBal[0], supply.toNumber());
-    });
-
-    it("needs to be established first", async () => {
-      assert.isFalse(await this.c2.isEstablished.call());
-      await this.bac.approve(this.c2.address, establishBac);
-      // not established yet so this reverts
-      truffleAssert.reverts(this.c2.issue(acc[0], establishC2));
-
-      await this.c2.establish(
-        this.bac.address,
-        establishBac,
-        establishC2,
-        agreementHash
-      );
-
-      assert.isTrue(await this.c2.isEstablished.call());
-      await assertBalance(this.c2, acc[0], establishC2);
-      assert.equal(await this.c2.totalSupply.call(), establishC2);
-
-      await assertBalance(this.bac, this.c2.address, establishBac);
-      await assertBalance(this.bac, acc[0], this.bacBal[0] - establishBac);
     });
 
     it("cannot be established twice", async () => {
