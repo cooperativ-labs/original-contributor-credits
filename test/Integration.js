@@ -42,12 +42,11 @@ contract("Integration_Test", async (acc) => {
     const establishBac = 1;
     const establishC2 = 100;
     await this.bac.approve(this.c2.address, establishBac);
-    await this.c2.establish(
-      this.bac.address,
-      establishBac,
-      establishC2,
-      agreementHash
-    );
+    await this.c2.establish(this.bac.address, agreementHash);
+
+    // fund to ratio
+    await this.c2.issue(acc[0], establishC2);
+    await this.bac.transfer(this.c2.address, establishBac);
 
     await assertBalance(this.c2, acc[0], establishC2);
   });
