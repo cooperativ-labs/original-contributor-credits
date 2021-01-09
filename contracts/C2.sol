@@ -16,7 +16,7 @@ contract C2 is ERC20, Ownable {
     modifier isLive() {
         require(
             isEstablished == true,
-            "token must be established with a ratio first"
+            "token must be established before use"
         );
         _;
     }
@@ -30,15 +30,13 @@ contract C2 is ERC20, Ownable {
     constructor() public ERC20("ContributorCredits", "C^2") {
     }
 
-    function establish(ERC20 backingTokenAddress, uint256 initialBac, uint256 initialC2, bytes32 agreement)
+    function establish(ERC20 backingTokenAddress, bytes32 agreement)
         public
         onlyOwner
         isNotLive
     {
         agreementHash = agreement;
         backingToken = backingTokenAddress;
-        backingToken.transferFrom(this.owner(), address(this), initialBac);
-        _mint(this.owner(), initialC2);
         isEstablished = true;
     }
 
@@ -86,15 +84,19 @@ contract C2 is ERC20, Ownable {
     }
 
     function backingNeededFor(uint256 amountC2) public view returns (uint256) {
-        // The -1 +1 is to get the ceiling division, rather than the floor so that you always err on the side of having more backing
-        if (bacBalance() == 0) {
+        if (bacBalance() == 0 || totalSupply() == 0) {
             return 0;
-        } else {
-            return amountC2.mul(bacBalance()).sub(1).div(totalSupply()).add(1);
         }
+
+        // The -1 +1 is to get the ceiling division, rather than the floor so that you always err on the side of having more backing
+        return amountC2.mul(bacBalance()).sub(1).div(totalSupply()).add(1);
     }
 
     function totalBackingNeededToFund() public view returns (uint256) {
+        if (totalSupply() == 0) {
+            return 0;
+        }
+        
         // decimals normalization
         if (decimals() > backingToken.decimals()) {
             // ceiling division

@@ -35,24 +35,6 @@ function testStakingRatio(establishBac, establishC2) {
       // deploy
       this.bac = await BackingToken.deployed();
       this.c2 = await C2.deployed();
-
-      // establish
-      assert.isFalse(await this.c2.isEstablished.call());
-      await this.bac.approve(this.c2.address, establishBac);
-      truffleAssert.reverts(this.c2.issue(acc[0], establishC2));
-
-      await this.c2.establish(
-        this.bac.address,
-        establishBac,
-        establishC2,
-        agreementHash
-      );
-
-      assert.isTrue(await this.c2.isEstablished.call());
-      await assertBalance(this.c2, acc[0], establishC2);
-      assert.equal(await this.c2.totalSupply.call(), establishC2);
-
-      await assertBalance(this.bac, this.c2.address, establishBac);
     });
 
     beforeEach(async () => {
@@ -65,9 +47,36 @@ function testStakingRatio(establishBac, establishC2) {
       );
     });
 
-    it("Can access version string", async () => {
-      const version = await this.c2.version.call();
-      assert.equal(version, "cc v0.1.2");
+    it("starts unestablished", async () => {
+      assert.isFalse(await this.c2.isEstablished.call());
+    })
+
+    it("cannot issue c2 without being established first", async () => {      
+      truffleAssert.reverts(this.c2.issue(acc[0], establishC2));
+    });
+
+    it("can be established", async () => {
+      await this.c2.establish(
+        this.bac.address,
+        agreementHash
+      );
+      assert.isTrue(await this.c2.isEstablished.call());
+      assert.equal(await this.c2.totalSupply.call(), 0);
+      await assertBalance(this.bac, this.c2.address, 0)
+    });
+      
+
+    it("maintains a staking ratio based on number of c2 and bac", async () => {  
+      await this.c2.issue(acc[0], establishC2);
+      await this.bac.transfer(this.c2.address, establishBac);
+
+      await assertBalance(this.c2, acc[0], establishC2);
+      assert.equal(await this.c2.totalSupply.call(), establishC2);
+      await assertBalance(this.bac, this.c2.address, establishBac);
+      await assertBalance(this.bac, acc[0], this.bacBal[0] - establishBac);
+
+      ratio = (await getBalance(this.bac, this.c2.address)) / (await this.c2.totalBackingNeededToFund.call())
+      assert.equal(ratio, initialStakingRatio)
     });
 
     it("cannot be established twice", async () => {
@@ -75,11 +84,14 @@ function testStakingRatio(establishBac, establishC2) {
       truffleAssert.reverts(
         this.c2.establish(
           this.bac.address,
-          establishBac,
-          establishC2,
           agreementHash
         )
       );
+    });
+
+    it("Can access version string", async () => {
+      const version = await this.c2.version.call();
+      assert.equal(version, "cc v0.1.2");
     });
 
     it("can retrieve backing token address", async () => {
@@ -222,13 +234,14 @@ function testBacDecimals(bacContract, bacDec, establishBac, establishC2) {
       );
 
       // establish
-      await this.bac.approve(this.c2.address, adjEstablishBac);
       await this.c2.establish(
         this.bac.address,
-        adjEstablishBac,
-        adjEstablishC2,
         agreementHash
       );
+
+      // fund to ratio
+      await this.c2.issue(acc[0], adjEstablishC2);
+      await this.bac.transfer(this.c2.address, adjEstablishBac);
     });
 
     it(`gives accurate funding data when BAC has ${bacDec} decimals`, async () => {
